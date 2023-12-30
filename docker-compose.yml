@@ -1,0 +1,25 @@
+version: "3.1"
+services:
+  apple-findmy-to-mqtt:
+    container_name: apple-findmy-to-mqtt
+    user: "${UID}:${GID}"
+    networks:
+      - apple-findmy-to-mqtt
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development
+      args:
+        - TZ=${TZ}
+        - UID=${UID}
+        - GID=${GID}
+    environment:
+      DEBUG: ${DEBUG}
+      GO_ENV: ${GO_ENV}
+      LOG_LEVEL: ${LOG_LEVEL}
+      TZ: ${TZ}
+    command: sh -c "go mod download && make run-live"
+    volumes:
+      - .:/go/src/apple-findmy-to-mqtt
+networks:
+  apple-findmy-to-mqtt:

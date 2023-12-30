@@ -1,0 +1,45 @@
+{
+  "environment": "ENVIRONMENT",
+  "log_output": "LOG_OUTPUT",
+  "log_level": "LOG_LEVEL",
+  "timer": 15,
+  "loggers": [
+    {
+      "type": "info",
+      "layout_format": "2006-01-02 15",
+      "path": "logs/info/",
+      "ropt": {
+        "max_size": 1,
+        "max_age": 30,
+        "max_backups": 90,
+        "compress": true
+      },
+      "lef": "InfoLevel"
+    },
+    {
+      "type": "warn",
+      "layout_format": "2006-01-02 15",
+      "path": "logs/warn/",
+      "ropt": {
+        "max_size": 1,
+        "max_age": 30,
+        "max_backups": 90,
+        "compress": true
+      },
+      "lef": "WarnLevel"
+    },
+    {
+      "type": "error",
+      "layout_format": "2006-01-02 15",
+      "path": "logs/error/",
+      "ropt": {
+        "max_size": 1,
+        "max_age": 30,
+        "max_backups": 90,
+        "compress": true
+      },
+      "lef": "ErrorLevel"
+    }
+  ],
+  "tz": "TZ"
+}
