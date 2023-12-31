@@ -31,7 +31,7 @@ This application uses a JSON configuration file to set up various parameters. He
 | `log_output` | Specifies the file where the application's logs will be written. | `logs/development.log` |
 | `log_level` | Sets the level of logs that will be written. | `debug` |
 | `tz` | Sets the timezone for the application. | `Europe/Paris` |
-| `timer` | Sets the interval (in minutes) at which the script scans the Apple FindMy cache. | `15` |
+| `scan_timer` | Sets the interval (in minutes) at which the script scans the Apple FindMy cache. | `15` |
 
 You should adjust these settings according to your needs and environment. Please ensure to replace all the placeholders with your actual data.
 ## Run
