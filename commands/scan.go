@@ -44,7 +44,7 @@ func (sC *ScanCommand) Run() cli.CommandRunner {
 	) {
 
 		logger.Info(fmt.Sprintf("%s | %s", names, "Starting the scan ..."))
-		ticker := time.NewTicker(time.Duration(config.Timer) * time.Minute)
+		ticker := time.NewTicker(time.Duration(config.ScanTimer) * time.Minute)
 		defer ticker.Stop()
 
 		for range ticker.C {

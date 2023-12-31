@@ -1,8 +1,7 @@
 {
   "environment": "ENVIRONMENT",
-  "log_output": "LOG_OUTPUT",
   "log_level": "LOG_LEVEL",
-  "timer": 15,
+  "log_output": "LOG_OUTPUT",
   "loggers": [
     {
       "type": "info",
@@ -41,5 +40,6 @@
       "lef": "ErrorLevel"
     }
   ],
+  "scan_timer": "SCAN_TIMER",
   "tz": "TZ"
 }

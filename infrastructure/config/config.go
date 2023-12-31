@@ -16,31 +16,65 @@ import (
 var (
 	envPath      string
 	globalConfig *Config
+	ENV_DEFAULT  = map[string]any{
+		"DEBUG":       true,
+		"ENVIRONMENT": "development",
+		"GO_ENV":      "development",
+		"LOG_LEVEL":   "info",
+		"LOG_OUTPUT":  "./logs/development.log",
+		"SCAN_TIMER":  15,
+		"TZ":          "Europe/Paris",
+	}
 )
 
 type Config struct {
 	Environment string         `json:"environment"`
-	LogOutput   string         `json:"log_output"`
-	LogLevel    string         `json:"log_level"`
-	Timer       int            `json:"timer"`
-	TZ          string         `json:"tz"`
 	Loggers     []LoggerConfig `json:"loggers"`
+	LogLevel    string         `json:"log_level"`
+	LogOutput   string         `json:"log_output"`
+	ScanTimer   int            `json:"scan_timer"`
+	TZ          string         `json:"tz"`
+}
+
+func (c *Config) UnmarshalJSON(data []byte) error {
+	type AliasConfig Config
+	alias := &struct {
+		ScanTimer string `json:"scan_timer"`
+		*AliasConfig
+	}{
+		AliasConfig: (*AliasConfig)(c),
+	}
+
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+
+	if alias.ScanTimer != "" {
+		val := getEnvValue(strings.ToUpper(alias.ScanTimer))
+		scanTimer, err := strconv.ParseInt(val, 10, 0)
+		if err != nil {
+			return err
+		}
+		c.ScanTimer = int(scanTimer)
+	}
+
+	return nil
 }
 
 type LoggerConfig struct {
-	Path         string        `json:"path"`
-	Type         string        `json:"type"`
-	LayoutFormat string        `json:"layout_format"`
 	Directory    string        `json:"directory"`
-	Ropt         RotateOptions `json:"ropt"`
+	LayoutFormat string        `json:"layout_format"`
 	Lef          string        `json:"lef"`
+	Path         string        `json:"path"`
+	Ropt         RotateOptions `json:"ropt"`
+	Type         string        `json:"type"`
 }
 
 type RotateOptions struct {
-	MaxSize    int  `json:"max_size"`
+	Compress   bool `json:"compress"`
 	MaxAge     int  `json:"max_age"`
 	MaxBackups int  `json:"max_backups"`
-	Compress   bool `json:"compress"`
+	MaxSize    int  `json:"max_size"`
 }
 
 func SetupConfig(_envPath string) error {
@@ -105,30 +139,42 @@ func replaceField(v reflect.Value) {
 	}
 }
 
+func getEnvValue(key string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	if value, ok := ENV_DEFAULT[key]; ok {
+		switch val := value.(type) {
+		case string:
+			return val
+		case int:
+			return strconv.Itoa(val)
+		case float64:
+			return strconv.FormatFloat(val, 'f', -1, 64)
+		default:
+			return fmt.Sprintf("%v", value)
+		}
+	}
+
+	return key
+}
+
 func replaceValue(v reflect.Value) {
 	if !v.IsValid() || !v.CanSet() {
 		return
 	}
-
+	k := strings.ToUpper(v.String())
+	val := getEnvValue(k)
 	switch v.Kind() {
 	case reflect.String:
-		envKey := strings.ToUpper(v.String())
-		if envValue, exists := os.LookupEnv(envKey); exists {
-			v.SetString(strings.Trim(envValue, "\""))
-		}
+		v.SetString(strings.Trim(val, "\""))
 	case reflect.Int:
-		envKey := strings.ToUpper(v.String())
-		if envValue, exists := os.LookupEnv(envKey); exists {
-			if intValue, err := strconv.Atoi(strings.Trim(envValue, "\"")); err == nil {
-				v.SetInt(int64(intValue))
-			}
+		if i, err := strconv.Atoi(strings.Trim(val, "\"")); err == nil {
+			v.SetInt(int64(i))
 		}
 	case reflect.Bool:
-		envKey := strings.ToUpper(v.String())
-		if envValue, exists := os.LookupEnv(envKey); exists {
-			if boolValue, err := strconv.ParseBool(strings.Trim(envValue, "\"")); err == nil {
-				v.SetBool(boolValue)
-			}
+		if boolValue, err := strconv.ParseBool(strings.Trim(val, "\"")); err == nil {
+			v.SetBool(boolValue)
 		}
 	case reflect.Map:
 		for _, key := range v.MapKeys() {
