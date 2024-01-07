@@ -17,29 +17,39 @@ var (
 	envPath      string
 	globalConfig *Config
 	ENV_DEFAULT  = map[string]any{
-		"DEBUG":       true,
-		"ENVIRONMENT": "development",
-		"GO_ENV":      "development",
-		"LOG_LEVEL":   "info",
-		"LOG_OUTPUT":  "./logs/development.log",
-		"SCAN_TIMER":  15,
-		"TZ":          "Europe/Paris",
+		"DEBUG":                             true,
+		"ENVIRONMENT":                       "development",
+		"GO_ENV":                            "development",
+		"KNOWN_LOCATIONS_DEFAULT_TOLERANCE": 70,
+		"KNOWN_LOCATIONS_PATH":              "known_locations.json",
+		"LOG_LEVEL":                         "info",
+		"LOG_OUTPUT":                        "./logs/development.log",
+		"MQTT_PORT":                         1883,
+		"MQTT_CLIENT_ID":                    "apple_findmy_to_mqtt",
+		"SCAN_TIMER":                        5,
+		"TZ":                                "Europe/Paris",
 	}
 )
 
 type Config struct {
-	Environment string         `json:"environment"`
-	Loggers     []LoggerConfig `json:"loggers"`
-	LogLevel    string         `json:"log_level"`
-	LogOutput   string         `json:"log_output"`
-	ScanTimer   int            `json:"scan_timer"`
-	TZ          string         `json:"tz"`
+	Environment                    string         `json:"environment"`
+	ForceSync                      bool           `json:"force_sync"`
+	KnownLocationsDefaultTolerance int            `json:"known_locations_default_tolerance"`
+	KnownLocationsPath             string         `json:"known_locations_path"`
+	Loggers                        []LoggerConfig `json:"loggers"`
+	LogLevel                       string         `json:"log_level"`
+	LogOutput                      string         `json:"log_output"`
+	Mqtt                           Mqtt           `json:"mqtt"`
+	ScanTimer                      int            `json:"scan_timer"`
+	TZ                             string         `json:"tz"`
 }
 
 func (c *Config) UnmarshalJSON(data []byte) error {
 	type AliasConfig Config
 	alias := &struct {
-		ScanTimer string `json:"scan_timer"`
+		ScanTimer                      string `json:"scan_timer"`
+		ForceSync                      string `json:"force_sync"`
+		KnownLocationsDefaultTolerance string `json:"known_locations_default_tolerance"`
 		*AliasConfig
 	}{
 		AliasConfig: (*AliasConfig)(c),
@@ -57,6 +67,22 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 		}
 		c.ScanTimer = int(scanTimer)
 	}
+	if alias.KnownLocationsDefaultTolerance != "" {
+		val := getEnvValue(strings.ToUpper(alias.KnownLocationsDefaultTolerance))
+		knownLocationsDefaultTolerance, err := strconv.ParseInt(val, 10, 0)
+		if err != nil {
+			return err
+		}
+		c.KnownLocationsDefaultTolerance = int(knownLocationsDefaultTolerance)
+	}
+	if alias.ForceSync != "" {
+		val := getEnvValue(strings.ToUpper(alias.ForceSync))
+		boolValue, err := strconv.ParseBool(strings.Trim(val, "\""))
+		if err != nil {
+			return err
+		}
+		c.ForceSync = boolValue
+	}
 
 	return nil
 }
@@ -68,6 +94,40 @@ type LoggerConfig struct {
 	Path         string        `json:"path"`
 	Ropt         RotateOptions `json:"ropt"`
 	Type         string        `json:"type"`
+}
+type Mqtt struct {
+	Broker    string `json:"broker"`
+	ClientID  string `json:"client_id"`
+	HassTopic string `json:"hass_topic"`
+	Password  string `json:"password"`
+	Port      int    `json:"port"`
+	Topic     string `json:"topic"`
+	Username  string `json:"username"`
+}
+
+func (m *Mqtt) UnmarshalJSON(data []byte) error {
+	type AliasMqtt Mqtt
+	alias := &struct {
+		Port string `json:"port"`
+		*AliasMqtt
+	}{
+		AliasMqtt: (*AliasMqtt)(m),
+	}
+
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+
+	if alias.Port != "" {
+		val := getEnvValue(strings.ToUpper(alias.Port))
+		port, err := strconv.ParseInt(val, 10, 0)
+		if err != nil {
+			return err
+		}
+		m.Port = int(port)
+	}
+
+	return nil
 }
 
 type RotateOptions struct {

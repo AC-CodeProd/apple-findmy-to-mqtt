@@ -6,3 +6,5 @@ coverage-all.out
 coverage.out
 RELEASE_NOTES.md
 .env
+*.data
+known_locations.json

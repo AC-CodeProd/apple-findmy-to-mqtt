@@ -8,7 +8,7 @@ import (
 	"go.uber.org/fx"
 )
 
-type Helpers interface {
+type IHelpers interface {
 	FindNamedMatches(regex *regexp.Regexp, str string) map[string]string
 }
 
@@ -19,7 +19,7 @@ type HelpersParams struct {
 	fx.In
 }
 
-func NewHelpers(shp HelpersParams) Helpers {
+func NewHelpers(shp HelpersParams) IHelpers {
 	return &helpers{}
 }
 
