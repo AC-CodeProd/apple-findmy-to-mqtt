@@ -1,9 +1,9 @@
 package commands
 
 import (
+	"apple-findmy-to-mqtt/commands/cli"
 	"apple-findmy-to-mqtt/infrastructure/config"
 	"apple-findmy-to-mqtt/infrastructure/logging"
-	"apple-findmy-to-mqtt/interfaces/cli"
 	"context"
 	"fmt"
 
@@ -12,7 +12,7 @@ import (
 	"go.uber.org/fx/fxevent"
 )
 
-var cmds = map[string]cli.Command{
+var cmds = map[string]cli.ICommand{
 	"scan": NewScanCommand(),
 }
 
@@ -27,7 +27,7 @@ func GetSubCommands(opt fx.Option) []*cobra.Command {
 	return subCmds
 }
 
-func wrapSubCommand(name string, cmd cli.Command, opt fx.Option) *cobra.Command {
+func wrapSubCommand(name string, cmd cli.ICommand, opt fx.Option) *cobra.Command {
 	const names = "__commands.go__ : wrapSubCommand"
 	subCmd := &cobra.Command{
 		Use:   name,

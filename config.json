@@ -1,5 +1,8 @@
 {
   "environment": "ENVIRONMENT",
+  "force_sync": "FORCE_SYNC",
+  "known_locations_default_tolerance": "KNOWN_LOCATIONS_DEFAULT_TOLERANCE",
+  "known_locations_path": "KNOWN_LOCATIONS_PATH",
   "log_level": "LOG_LEVEL",
   "log_output": "LOG_OUTPUT",
   "loggers": [
@@ -40,6 +43,15 @@
       "lef": "ErrorLevel"
     }
   ],
+  "mqtt": {
+    "broker": "MQTT_BROKER",
+    "client_id": "MQTT_CLIENT_ID",
+    "hass_topic": "MQTT_HASS_TOPIC",
+    "password": "MQTT_PASSWORD",
+    "port": "MQTT_PORT",
+    "topic": "MQTT_TOPIC",
+    "username": "MQTT_USERNAME"
+  },
   "scan_timer": "SCAN_TIMER",
   "tz": "TZ"
 }

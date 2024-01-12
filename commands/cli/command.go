@@ -2,10 +2,10 @@ package cli
 
 import "github.com/spf13/cobra"
 
-type CommandRunner interface{}
+type ICommandRunner interface{}
 
 // Command interface is used to implement sub-commands in the system.
-type Command interface {
+type ICommand interface {
 	// Short returns string about short description of the command
 	// the string is shown in help screen of cobra command
 	Short() string
@@ -31,5 +31,5 @@ type Command interface {
 	//    },
 	//  }
 	//
-	Run() CommandRunner
+	Run() ICommandRunner
 }
